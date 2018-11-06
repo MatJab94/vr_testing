@@ -2,7 +2,7 @@
 
 public class Climbable : Grabbable
 {
-	ClimbingPhysics climbingPhysics;
+	FallingPhysics fallingPhysics;
 
 	public override void Grab(OVRInput.Controller hand, Transform grabberTransform, Rigidbody playerRigidbody, bool longGrabMode)
 	{
@@ -11,8 +11,8 @@ public class Climbable : Grabbable
 		player = playerRigidbody;
 		player.isKinematic = false;
 
-		climbingPhysics = player.gameObject.GetComponent<ClimbingPhysics>();
-		climbingPhysics.isClimbing = true;
+		fallingPhysics = player.gameObject.GetComponent<FallingPhysics>();
+		fallingPhysics.keepNonKinematic = true;
 
 		grabber = grabberTransform;
 		anchor = new GameObject().transform;
@@ -25,7 +25,7 @@ public class Climbable : Grabbable
 	{
 		if (grabber == grabberTransform)
 		{
-			climbingPhysics.isClimbing = false;
+			fallingPhysics.keepNonKinematic = false;
 			grabber = null;
 			Destroy(anchor.gameObject);
 			anchor = null;

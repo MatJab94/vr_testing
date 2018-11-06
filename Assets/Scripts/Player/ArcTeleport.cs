@@ -1,11 +1,9 @@
 ﻿using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]
-public class ArcTeleport : MonoBehaviour
+public class ArcTeleport : MonoBehaviour, IToggleable
 {
 	[Header("Controls")]
-	[SerializeField] KeyCode toggleButton;
-	[SerializeField] OVRInput.RawButton toggleButtonVR;
 	[SerializeField] KeyCode teleportButton;
 	[SerializeField] OVRInput.RawButton teleportButtonVR;
 	[SerializeField] OVRInput.Controller hand;
@@ -28,7 +26,7 @@ public class ArcTeleport : MonoBehaviour
 	[SerializeField, Range(25, 150)] int maxSegmentCount;
 	[SerializeField, Range(0.1f, 2f)] float segScale;
 
-	bool isTeleportActive, isTeleportValid;
+	bool isActive, isTeleportValid;
 	RaycastHit hit;
 	float dot, minValidDot;
 	LineRenderer arcRenderer;
@@ -46,10 +44,7 @@ public class ArcTeleport : MonoBehaviour
 
 	void Update()
 	{
-		if (Application.isEditor && Input.GetKeyDown(toggleButton) ||
-			OVRInput.GetDown(toggleButtonVR, hand))
-			ToggleActive();
-		if (!isTeleportActive) return;
+		if (!isActive) return;
 
 		SimulatePath();
 
@@ -58,19 +53,18 @@ public class ArcTeleport : MonoBehaviour
 			Teleport();
 	}
 
-	void ToggleActive()
+	public void Deactivate()
 	{
-		if (isTeleportActive)
-		{
-			arcMarker.gameObject.SetActive(false);
-			arcRenderer.enabled = false;
-		}
-		else
-		{
-			arcMarker.gameObject.SetActive(true);
-			arcRenderer.enabled = true;
-		}
-		isTeleportActive = !isTeleportActive;
+		arcMarker.gameObject.SetActive(false);
+		arcRenderer.enabled = false;
+		isActive = false;
+	}
+
+	public void Activate()
+	{
+		arcMarker.gameObject.SetActive(true);
+		arcRenderer.enabled = true;
+		isActive = true;
 	}
 
 	void SimulatePath()

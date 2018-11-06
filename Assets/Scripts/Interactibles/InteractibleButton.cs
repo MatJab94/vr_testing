@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class InteractibleButton : Interactible
 {
-	[SerializeField] Interactible connectedInteractible;
+	[SerializeField] Interactible[] connectedInteractibles;
 	[SerializeField] Transform button;
 	[SerializeField] float speed = 0.1f;
 	[SerializeField] float animateTime = 0.2f;
@@ -12,20 +12,20 @@ public class InteractibleButton : Interactible
 
 	protected override void InteractionStarted()
 	{
-		if (connectedInteractible != null)
+		toggle = !toggle;
+		foreach (var interactible in connectedInteractibles)
 		{
-			toggle = !toggle;
-			if (toggle) connectedInteractible.InteractStart();
-			else connectedInteractible.InteractEnd();
+			if (toggle) interactible.InteractStart();
+			else interactible.InteractEnd();
 		}
-		StartCoroutine(Animate());
+		StartCoroutine(AnimateButtonPush());
 	}
 
 	protected override void InteractionActive() { }
 
 	protected override void InteractionEnded() { }
 
-	IEnumerator Animate()
+	IEnumerator AnimateButtonPush()
 	{
 		float time = 0;
 		while (time < animateTime)

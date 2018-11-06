@@ -236,7 +236,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0014ba3eed33fd4d9c2682b080dee25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  connectedInteractible: {fileID: 0}
+  connectedInteractibles:
+  - {fileID: 0}
+  - {fileID: 0}
   button: {fileID: 4876342779930450}
   speed: 0.1
   animateTime: 0.2
