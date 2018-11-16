@@ -1,22 +1,17 @@
 /************************************************************************************
+Copyright : Copyright (c) Facebook Technologies, LLC and its affiliates. All rights reserved.
 
-Copyright   :   Copyright (c) Facebook Technologies, LLC and its affiliates. All rights reserved.
-
-Licensed under the Oculus SDK License Version 3.4.1 (the "License");
-you may not use the Oculus SDK except in compliance with the License,
-which is provided at the time of installation or download, or which
-otherwise accompanies this software in either electronic or hard copy form.
+Licensed under the Oculus Utilities SDK License Version 1.31 (the "License"); you may not use
+the Utilities SDK except in compliance with the License, which is provided at the time of installation
+or download, or which otherwise accompanies this software in either electronic or hard copy form.
 
 You may obtain a copy of the License at
+https://developer.oculus.com/licenses/utilities-1.31
 
-https://developer.oculus.com/licenses/sdk-3.4.1
-
-Unless required by applicable law or agreed to in writing, the Oculus SDK
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
+Unless required by applicable law or agreed to in writing, the Utilities SDK distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+ANY KIND, either express or implied. See the License for the specific language governing
+permissions and limitations under the License.
 ************************************************************************************/
 
 #if !UNITY_5_6_OR_NEWER
@@ -27,7 +22,14 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 #if UNITY_EDITOR
-using UnityEditor;
+#endif
+
+#if UNITY_2017_2_OR_NEWER
+using Settings = UnityEngine.XR.XRSettings;
+using Node = UnityEngine.XR.XRNode;
+#else
+using Settings = UnityEngine.VR.VRSettings;
+using Node = UnityEngine.VR.VRNode;
 #endif
 
 /// <summary>
@@ -37,7 +39,7 @@ public class OVRManager : MonoBehaviour
 {
 	public enum TrackingOrigin
 	{
-		EyeLevel   = OVRPlugin.TrackingOrigin.EyeLevel,
+		EyeLevel = OVRPlugin.TrackingOrigin.EyeLevel,
 		FloorLevel = OVRPlugin.TrackingOrigin.FloorLevel,
 	}
 
@@ -54,6 +56,13 @@ public class OVRManager : MonoBehaviour
 		LMSLow = OVRPlugin.TiledMultiResLevel.LMSLow,
 		LMSMedium = OVRPlugin.TiledMultiResLevel.LMSMedium,
 		LMSHigh = OVRPlugin.TiledMultiResLevel.LMSHigh,
+	}
+
+	public enum XRDevice
+	{
+		Unknown = 0,
+		Oculus = 1,
+		OpenVR = 2,
 	}
 
 	/// <summary>
@@ -82,7 +91,8 @@ public class OVRManager : MonoBehaviour
 	/// </summary>
 	public static OVRProfile profile
 	{
-		get {
+		get
+		{
 			if (_profile == null)
 				_profile = new OVRProfile();
 
@@ -157,10 +167,10 @@ public class OVRManager : MonoBehaviour
 	/// Occurs when Health & Safety Warning is dismissed.
 	/// </summary>
 	//Disable the warning about it being unused. It's deprecated.
-	#pragma warning disable 0067
+#pragma warning disable 0067
 	[Obsolete]
 	public static event Action HSWDismissed;
-	#pragma warning restore
+#pragma warning restore
 
 	private static bool _isHmdPresentCached = false;
 	private static bool _isHmdPresent = false;
@@ -170,7 +180,8 @@ public class OVRManager : MonoBehaviour
 	/// </summary>
 	public static bool isHmdPresent
 	{
-		get {
+		get
+		{
 			if (!_isHmdPresentCached)
 			{
 				_isHmdPresentCached = true;
@@ -180,7 +191,8 @@ public class OVRManager : MonoBehaviour
 			return _isHmdPresent;
 		}
 
-		private set {
+		private set
+		{
 			_isHmdPresentCached = true;
 			_isHmdPresent = value;
 		}
@@ -216,7 +228,8 @@ public class OVRManager : MonoBehaviour
 	/// </summary>
 	public static bool hasVrFocus
 	{
-		get {
+		get
+		{
 			if (!_hasVrFocusCached)
 			{
 				_hasVrFocusCached = true;
@@ -226,7 +239,8 @@ public class OVRManager : MonoBehaviour
 			return _hasVrFocus;
 		}
 
-		private set {
+		private set
+		{
 			_hasVrFocusCached = true;
 			_hasVrFocus = value;
 		}
@@ -249,14 +263,16 @@ public class OVRManager : MonoBehaviour
 	/// </summary>
 	public bool chromatic
 	{
-		get {
+		get
+		{
 			if (!isHmdPresent)
 				return false;
 
 			return OVRPlugin.chromatic;
 		}
 
-		set {
+		set
+		{
 			if (!isHmdPresent)
 				return;
 
@@ -311,7 +327,7 @@ public class OVRManager : MonoBehaviour
 	public bool enableAdaptiveResolution = false;
 
 	/// <summary>
-	/// Adaptive Resolution is based on Unity engine's renderViewportScale/eyeTextureResolutionScale feature 
+	/// Adaptive Resolution is based on Unity engine's renderViewportScale/eyeTextureResolutionScale feature
 	/// But renderViewportScale was broken in an array of Unity engines, this function help to filter out those broken engines
 	/// </summary>
 	public static bool IsAdaptiveResSupportedByEngine()
@@ -570,20 +586,27 @@ public class OVRManager : MonoBehaviour
 	/// </summary>
 	public int vsyncCount
 	{
-		get {
+		get
+		{
 			if (!isHmdPresent)
 				return 1;
 
 			return OVRPlugin.vsyncCount;
 		}
 
-		set {
+		set
+		{
 			if (!isHmdPresent)
 				return;
 
 			OVRPlugin.vsyncCount = value;
 		}
 	}
+
+	public static string OCULUS_UNITY_NAME_STR = "Oculus";
+	public static string OPENVR_UNITY_NAME_STR = "OpenVR";
+
+	public static XRDevice loadedXRDevice;
 
 	/// <summary>
 	/// Gets the current battery level.
@@ -592,7 +615,8 @@ public class OVRManager : MonoBehaviour
 	/// <param name="batteryLevel">Battery level.</param>
 	public static float batteryLevel
 	{
-		get {
+		get
+		{
 			if (!isHmdPresent)
 				return 1f;
 
@@ -607,7 +631,8 @@ public class OVRManager : MonoBehaviour
 	/// <param name="batteryTemperature">Battery temperature.</param>
 	public static float batteryTemperature
 	{
-		get {
+		get
+		{
 			if (!isHmdPresent)
 				return 0f;
 
@@ -622,7 +647,8 @@ public class OVRManager : MonoBehaviour
 	/// <param name="batteryStatus">Battery status.</param>
 	public static int batteryStatus
 	{
-		get {
+		get
+		{
 			if (!isHmdPresent)
 				return -1;
 
@@ -636,7 +662,8 @@ public class OVRManager : MonoBehaviour
 	/// <returns><c>volume level in the range [0,1].</c>
 	public static float volumeLevel
 	{
-		get {
+		get
+		{
 			if (!isHmdPresent)
 				return 0f;
 
@@ -649,14 +676,16 @@ public class OVRManager : MonoBehaviour
 	/// </summary>
 	public static int cpuLevel
 	{
-		get {
+		get
+		{
 			if (!isHmdPresent)
 				return 2;
 
 			return OVRPlugin.cpuLevel;
 		}
 
-		set {
+		set
+		{
 			if (!isHmdPresent)
 				return;
 
@@ -669,14 +698,16 @@ public class OVRManager : MonoBehaviour
 	/// </summary>
 	public static int gpuLevel
 	{
-		get {
+		get
+		{
 			if (!isHmdPresent)
 				return 2;
 
 			return OVRPlugin.gpuLevel;
 		}
 
-		set {
+		set
+		{
 			if (!isHmdPresent)
 				return;
 
@@ -689,7 +720,8 @@ public class OVRManager : MonoBehaviour
 	/// </summary>
 	public static bool isPowerSavingActive
 	{
-		get {
+		get
+		{
 			if (!isHmdPresent)
 				return false;
 
@@ -777,6 +809,54 @@ public class OVRManager : MonoBehaviour
 		}
 	}
 
+	/// <summary>
+	/// Sets the Color Scale and Offset which is commonly used for effects like fade-to-black.
+	/// In our compositor, once a given frame is rendered, warped, and ready to be displayed, we then multiply
+	/// each pixel by colorScale and add it to colorOffset, whereby newPixel = oldPixel * colorScale + colorOffset.
+	/// Note that for mobile devices (Quest, Go, etc.), colorOffset is not supported, so colorScale is all that can
+	/// be used. A colorScale of (1, 1, 1, 1) and colorOffset of (0, 0, 0, 0) will lead to an identity multiplication
+	/// and have no effect.
+	/// </summary>
+	public static void SetColorScaleAndOffset(Vector4 colorScale, Vector4 colorOffset, bool applyToAllLayers)
+	{
+		OVRPlugin.SetColorScaleAndOffset(colorScale, colorOffset, applyToAllLayers);
+	}
+
+	/// <summary>
+	/// Specifies OpenVR pose local to tracking space
+	/// </summary>
+	public static void SetOpenVRLocalPose(Vector3 leftPos, Vector3 rightPos, Quaternion leftRot, Quaternion rightRot)
+	{
+		if (loadedXRDevice == XRDevice.OpenVR)
+			OVRInput.SetOpenVRLocalPose(leftPos, rightPos, leftRot, rightRot);
+	}
+
+	//Series of offsets that line up the virtual controllers to the phsyical world.
+	private static Vector3 OpenVRTouchRotationOffsetEulerLeft = new Vector3(40.0f, 0.0f, 0.0f);
+	private static Vector3 OpenVRTouchRotationOffsetEulerRight = new Vector3(40.0f, 0.0f, 0.0f);
+	private static Vector3 OpenVRTouchPositionOffsetLeft = new Vector3(0.0075f, -0.005f, -0.0525f);
+	private static Vector3 OpenVRTouchPositionOffsetRight = new Vector3(-0.0075f, -0.005f, -0.0525f);
+
+	/// <summary>
+	/// Specifies the pose offset required to make an OpenVR controller's reported pose match the virtual pose.
+	/// Currently we only specify this offset for Oculus Touch on OpenVR.
+	/// </summary>
+	public static OVRPose GetOpenVRControllerOffset(Node hand)
+	{
+		OVRPose poseOffset = OVRPose.identity;
+		if ((hand == Node.LeftHand || hand == Node.RightHand) && loadedXRDevice == XRDevice.OpenVR)
+		{
+			int index = (hand == Node.LeftHand) ? 0 : 1;
+			if (OVRInput.openVRControllerDetails[index].controllerType == OVRInput.OpenVRController.OculusTouch)
+			{
+				Vector3 offsetOrientation = (hand == Node.LeftHand) ? OpenVRTouchRotationOffsetEulerLeft : OpenVRTouchRotationOffsetEulerRight;
+				poseOffset.orientation = Quaternion.Euler(offsetOrientation.x, offsetOrientation.y, offsetOrientation.z);
+				poseOffset.position = (hand == Node.LeftHand) ? OpenVRTouchPositionOffsetLeft : OpenVRTouchPositionOffsetRight;
+			}
+		}
+		return poseOffset;
+	}
+
 
 	[Header("Tracking")]
 	[SerializeField]
@@ -787,14 +867,16 @@ public class OVRManager : MonoBehaviour
 	/// </summary>
 	public OVRManager.TrackingOrigin trackingOriginType
 	{
-		get {
+		get
+		{
 			if (!isHmdPresent)
 				return _trackingOriginType;
 
 			return (OVRManager.TrackingOrigin)OVRPlugin.GetTrackingOriginType();
 		}
 
-		set {
+		set
+		{
 			if (!isHmdPresent)
 				return;
 
@@ -831,14 +913,14 @@ public class OVRManager : MonoBehaviour
 	public bool resetTrackerOnLoad = false;
 
 	/// <summary>
-	/// If true, the Reset View in the universal menu will cause the pose to be reset. This should generally be 
-	/// enabled for applications with a stationary position in the virtual world and will allow the View Reset 
-	/// command to place the person back to a predefined location (such as a cockpit seat). 
-	/// Set this to false if you have a locomotion system because resetting the view would effectively teleport 
+	/// If true, the Reset View in the universal menu will cause the pose to be reset. This should generally be
+	/// enabled for applications with a stationary position in the virtual world and will allow the View Reset
+	/// command to place the person back to a predefined location (such as a cockpit seat).
+	/// Set this to false if you have a locomotion system because resetting the view would effectively teleport
 	/// the player to potentially invalid locations.
 	/// </summary>
 	[Tooltip("If true, the Reset View in the universal menu will cause the pose to be reset. This should generally be enabled for applications with a stationary position in the virtual world and will allow the View Reset command to place the person back to a predefined location (such as a cockpit seat). Set this to false if you have a locomotion system because resetting the view would effectively teleport the player to potentially invalid locations.")]
-    public bool AllowRecenter = true;
+	public bool AllowRecenter = true;
 
 	[SerializeField]
 	[Tooltip("Specifies HMD recentering behavior when controller recenter is performed. True recenters the HMD as well, false does not.")]
@@ -879,7 +961,8 @@ public class OVRManager : MonoBehaviour
 	/// </summary>
 	public bool isUserPresent
 	{
-		get {
+		get
+		{
 			if (!_isUserPresentCached)
 			{
 				_isUserPresentCached = true;
@@ -889,7 +972,8 @@ public class OVRManager : MonoBehaviour
 			return _isUserPresent;
 		}
 
-		private set {
+		private set
+		{
 			_isUserPresentCached = true;
 			_isUserPresent = value;
 		}
@@ -978,7 +1062,7 @@ public class OVRManager : MonoBehaviour
 	{
 		string ver = Application.unityVersion;
 		int pos = ver.Length - 1;
-		
+
 		while (pos >= 0 && ver[pos] >= '0' && ver[pos] <= '9')
 		{
 			--pos;
@@ -992,7 +1076,7 @@ public class OVRManager : MonoBehaviour
 
 	internal static string UnityAlphaOrBetaVersionWarningMessage = "WARNING: It's not recommended to use Unity alpha/beta release in Oculus development. Use a stable release if you encounter any issue.";
 
-#region Unity Messages
+	#region Unity Messages
 
 	private void Awake()
 	{
@@ -1009,8 +1093,8 @@ public class OVRManager : MonoBehaviour
 		/*Debug.Log("Unity v" + Application.unityVersion + ", " +
 				  "Oculus Utilities v" + OVRPlugin.wrapperVersion + ", " +
 				  "OVRPlugin v" + OVRPlugin.version + ", " +
-				  "SDK v" + OVRPlugin.nativeSDKVersion + ".");*/
-
+				  "SDK v" + OVRPlugin.nativeSDKVersion + ".");
+		*/
 #if !UNITY_EDITOR
 		if (IsUnityAlphaOrBetaVersion())
 		{
@@ -1111,7 +1195,7 @@ public class OVRManager : MonoBehaviour
 			display.RecenterPose();
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-		// Force OcculusionMesh on all the time, you can change the value to false if you really need it be off for some reasons, 
+		// Force OcculusionMesh on all the time, you can change the value to false if you really need it be off for some reasons,
 		// be aware there are performance drops if you don't use occlusionMesh.
 		OVRPlugin.occlusionMesh = true;
 #endif
@@ -1127,6 +1211,26 @@ public class OVRManager : MonoBehaviour
 	}
 #endif
 
+	void SetCurrentXRDevice()
+	{
+		if (OVRPlugin.initialized)
+		{
+			loadedXRDevice = XRDevice.Oculus;
+		}
+		else if (Settings.enabled)
+		{
+			string loadedXRDeviceName = Settings.loadedDeviceName;
+			if (loadedXRDeviceName == OPENVR_UNITY_NAME_STR)
+				loadedXRDevice = XRDevice.OpenVR;
+			else
+				loadedXRDevice = XRDevice.Unknown;
+		}
+		else
+		{
+			loadedXRDevice = XRDevice.Unknown;
+		}
+	}
+
 	void Initialize()
 	{
 		if (display == null)
@@ -1137,6 +1241,8 @@ public class OVRManager : MonoBehaviour
 			boundary = new OVRBoundary();
 
 		reorientHMDOnControllerRecenter = _reorientHMDOnControllerRecenter;
+		SetCurrentXRDevice();
+
 	}
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
@@ -1152,6 +1258,8 @@ public class OVRManager : MonoBehaviour
 			Initialize();
 		}
 #endif
+
+		SetCurrentXRDevice();
 
 		if (OVRPlugin.shouldQuit)
 			Application.Quit();
@@ -1491,7 +1599,7 @@ public class OVRManager : MonoBehaviour
 		}
 		if (cameras.Count == 0)
 		{
-			return Camera.main;		// pick one of the cameras which tagged as "MainCamera"
+			return Camera.main;     // pick one of the cameras which tagged as "MainCamera"
 		}
 		else if (cameras.Count == 1)
 		{
@@ -1536,7 +1644,7 @@ public class OVRManager : MonoBehaviour
 		OVRManager.PlatformUIConfirmQuit();
 	}
 
-#endregion
+	#endregion
 
 	public static void PlatformUIConfirmQuit()
 	{

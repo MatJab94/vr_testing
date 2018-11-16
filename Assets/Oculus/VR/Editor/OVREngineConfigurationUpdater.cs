@@ -1,4 +1,3 @@
-#pragma warning disable 219
 /************************************************************************************
 
 Copyright   :   Copyright (c) Facebook Technologies, LLC and its affiliates. All rights reserved.
@@ -20,11 +19,9 @@ limitations under the License.
 
 ************************************************************************************/
 
-using UnityEngine;
-using UnityEditor;
-using UnityEditor.Callbacks;
-using System;
 using System.IO;
+using UnityEditor;
+using UnityEngine;
 
 [InitializeOnLoad]
 class OVREngineConfigurationUpdater
@@ -47,7 +44,7 @@ class OVREngineConfigurationUpdater
 
 		Debug.Log("Using required project settings: " + setPrefsForUtilities);
 	}
-	
+
 #if UNITY_2017_3_OR_NEWER
 	private static readonly string dashSupportEnableConfirmedKey = "Oculus_Utilities_OVREngineConfiguration_DashSupportEnableConfirmed_" + Application.unityVersion + OVRManager.utilitiesVersion;
 	private static bool dashSupportEnableConfirmed
@@ -62,7 +59,7 @@ class OVREngineConfigurationUpdater
 			PlayerPrefs.SetInt(dashSupportEnableConfirmedKey, value ? 1 : 0);
 		}
 	}
-	
+
 	private static void DashSupportWarningPrompt()
 	{
 		/// <summary>
@@ -89,7 +86,7 @@ class OVREngineConfigurationUpdater
 	}
 #endif
 
-    static OVREngineConfigurationUpdater()
+	static OVREngineConfigurationUpdater()
 	{
 		EditorApplication.delayCall += OnDelayCall;
 		EditorApplication.update += OnUpdate;
@@ -119,7 +116,7 @@ class OVREngineConfigurationUpdater
 	{
 		if (!setPrefsForUtilities)
 			return;
-		
+
 		EnforceBundleId();
 		EnforceVRSupport();
 		EnforceInstallLocation();
@@ -166,13 +163,13 @@ class OVREngineConfigurationUpdater
 	{
 		if (PlayerSettings.virtualRealitySupported)
 			return;
-		
+
 		var mgrs = GameObject.FindObjectsOfType<OVRManager>();
 		for (int i = 0; i < mgrs.Length; ++i)
 		{
-			if (mgrs [i].isActiveAndEnabled)
+			if (mgrs[i].isActiveAndEnabled)
 			{
-				Debug.Log ("Enabling Unity VR support");
+				Debug.Log("Enabling Unity VR support");
 				PlayerSettings.virtualRealitySupported = true;
 
 				bool oculusFound = false;
@@ -214,14 +211,14 @@ class OVREngineConfigurationUpdater
 	{
 		try
 		{
-			BindAxis(new Axis() { name = "Oculus_GearVR_LThumbstickX",  axis =  0,               });
-			BindAxis(new Axis() { name = "Oculus_GearVR_LThumbstickY",  axis =  1, invert = true });
-			BindAxis(new Axis() { name = "Oculus_GearVR_RThumbstickX",  axis =  2,               });
-			BindAxis(new Axis() { name = "Oculus_GearVR_RThumbstickY",  axis =  3, invert = true });
-			BindAxis(new Axis() { name = "Oculus_GearVR_DpadX",         axis =  4,               });
-			BindAxis(new Axis() { name = "Oculus_GearVR_DpadY",         axis =  5, invert = true });
-			BindAxis(new Axis() { name = "Oculus_GearVR_LIndexTrigger", axis = 12,               });
-			BindAxis(new Axis() { name = "Oculus_GearVR_RIndexTrigger", axis = 11,               });
+			BindAxis(new Axis() { name = "Oculus_GearVR_LThumbstickX", axis = 0, });
+			BindAxis(new Axis() { name = "Oculus_GearVR_LThumbstickY", axis = 1, invert = true });
+			BindAxis(new Axis() { name = "Oculus_GearVR_RThumbstickX", axis = 2, });
+			BindAxis(new Axis() { name = "Oculus_GearVR_RThumbstickY", axis = 3, invert = true });
+			BindAxis(new Axis() { name = "Oculus_GearVR_DpadX", axis = 4, });
+			BindAxis(new Axis() { name = "Oculus_GearVR_DpadY", axis = 5, invert = true });
+			BindAxis(new Axis() { name = "Oculus_GearVR_LIndexTrigger", axis = 12, });
+			BindAxis(new Axis() { name = "Oculus_GearVR_RIndexTrigger", axis = 11, });
 			BindAxis(new Axis() { name = "Oculus_CrossPlatform_Button2", positiveButton = "joystick button 0", gravity = 1000f, sensitivity = 1000f, type = 0 });
 			BindAxis(new Axis() { name = "Oculus_CrossPlatform_Button4", positiveButton = "joystick button 2", gravity = 1000f, sensitivity = 1000f, type = 0 });
 			BindAxis(new Axis() { name = "Oculus_CrossPlatform_PrimaryThumbstick", positiveButton = "joystick button 8", gravity = 0f, dead = 0f, sensitivity = 0.1f, type = 0 });
@@ -246,12 +243,10 @@ class OVREngineConfigurationUpdater
 		// Don't bug the user in play mode.
 		if (Application.isPlaying)
 			return;
-		
+
 		// Don't warn if the project may be set up for submission or global signing.
 		if (File.Exists(androidManifestPath))
 			return;
-
-		bool foundPossibleOsig = false;
 		if (Directory.Exists(androidAssetsPath))
 		{
 			var files = Directory.GetFiles(androidAssetsPath);
@@ -259,25 +254,24 @@ class OVREngineConfigurationUpdater
 			{
 				if (!files[i].Contains(".txt"))
 				{
-					foundPossibleOsig = true;
 					break;
 				}
 			}
 		}
 
-		/*if (!foundPossibleOsig)
-			Debug.LogWarning("Missing Gear VR OSIG at " + androidAssetsPath + ". Please see https://dashboard.oculus.com/tools/osig-generator");*/
+		//if (!foundPossibleOsig)
+		//Debug.LogWarning("Missing Gear VR OSIG at " + androidAssetsPath + ". Please see https://dashboard.oculus.com/tools/osig-generator");
 	}
 
 	private class Axis
 	{
-		public string name = String.Empty;
-		public string descriptiveName = String.Empty;
-		public string descriptiveNegativeName = String.Empty;
-		public string negativeButton = String.Empty;
-		public string positiveButton = String.Empty;
-		public string altNegativeButton = String.Empty;
-		public string altPositiveButton = String.Empty;
+		public string name = string.Empty;
+		public string descriptiveName = string.Empty;
+		public string descriptiveNegativeName = string.Empty;
+		public string negativeButton = string.Empty;
+		public string positiveButton = string.Empty;
+		public string altNegativeButton = string.Empty;
+		public string altPositiveButton = string.Empty;
 		public float gravity = 0.0f;
 		public float dead = 0.001f;
 		public float sensitivity = 1.0f;
